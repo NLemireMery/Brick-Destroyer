@@ -10,8 +10,9 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
-    public Text ScoreText;
     public GameObject GameOverText;
+    public Text NameScoreText;
+    public Text HighestScoreText;
     
     private bool m_Started = false;
     private int m_Points;
@@ -36,10 +37,29 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
     }
 
     private void Update()
     {
+        /* Prevent errors if the game is played directly from Main scene */
+        if (DataManager.Instance == null)
+        {
+            NameScoreText.text = "You got this dear stranger! Score: " + m_Points;
+        }
+        else
+        {
+            NameScoreText.text = "You got this " + DataManager.Instance.playerName.text + "! Score: " + m_Points;
+            if(DataManager.Instance.bestPlayerName == "")
+            {
+                HighestScoreText.text = "Where is the high score?!";
+            }
+            else
+            {
+                HighestScoreText.text = DataManager.Instance.bestPlayerName + " got the highest score: " + DataManager.Instance.playerFinalScore;
+            }
+        }
+
         if (!m_Started)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -55,9 +75,17 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+            /* When game over, save the score data in the DataManager */
+            if(DataManager.Instance.playerFinalScore < m_Points)
+            {
+                DataManager.Instance.bestPlayerName = DataManager.Instance.playerName.text;
+                DataManager.Instance.playerFinalScore = m_Points;
+            };
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                DataManager.Instance.SaveNameHighScore();
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -65,7 +93,6 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
     }
 
     public void GameOver()
