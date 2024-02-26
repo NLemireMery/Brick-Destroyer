@@ -45,14 +45,15 @@ public class MainManager : MonoBehaviour
         /* Prevent errors if the game is played directly from Main scene */
         if (DataManager.Instance == null)
         {
-            NameScoreText.text = "You got this dear stranger! Score: " + m_Points;
+            NameScoreText.text = "Stranger | Your Score: " + m_Points;
+            HighestScoreText.text = "Where is the high score?!";
         }
         else
         {
-            NameScoreText.text = "You got this " + DataManager.Instance.playerName.text + "! Score: " + m_Points;
-            if(DataManager.Instance.bestPlayerName == "")
+            NameScoreText.text = DataManager.Instance.playerName.text + " | Your Score: " + m_Points;
+            if(System.String.IsNullOrEmpty(DataManager.Instance.bestPlayerName))
             {
-                HighestScoreText.text = "Where is the high score?!";
+                HighestScoreText.text = "No high scores yet!";
             }
             else
             {
@@ -75,18 +76,21 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
-            /* When game over, save the score data in the DataManager */
-            if(DataManager.Instance.playerFinalScore < m_Points)
+            if (DataManager.Instance != null)
             {
-                DataManager.Instance.bestPlayerName = DataManager.Instance.playerName.text;
-                DataManager.Instance.playerFinalScore = m_Points;
-            };
+                /* When game over, save the score data in the DataManager */
+                if(DataManager.Instance.playerFinalScore < m_Points)
+                {
+                    DataManager.Instance.bestPlayerName = DataManager.Instance.playerName.text;
+                    DataManager.Instance.playerFinalScore = m_Points;
+                    DataManager.Instance.SaveNameHighScore();
+                };
+            }
 
             if (Input.GetKeyDown(KeyCode.Space))
-            {
-                DataManager.Instance.SaveNameHighScore();
-                SceneManager.LoadScene(0);
-            }
+                {
+                    SceneManager.LoadScene(0);
+                }
         }
     }
 
